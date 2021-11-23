@@ -31,11 +31,10 @@ module Planner
       sTime
       where 
         trainTimings = [(Data.Map.findWithDefault "0" startStationName train, Data.Map.findWithDefault "0" endStationName train) | train <- makeTrains timetable]
-        durationWithStartTime = [(
+        (_, sTime) = minimum [(
             read(Prelude.take 2 endTime) * 60 + 
             read(Prelude.drop 2 endTime) -
             read(Prelude.take 2 startTime) * 60 - 
             read(Prelude.drop 2 startTime) :: Int,
             startTime
           ) | (startTime, endTime) <- trainTimings]
-        (_, sTime) = minimum durationWithStartTime
