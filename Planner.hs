@@ -1,6 +1,7 @@
 module Planner
   where
     import Data.Map
+    import Data.Maybe
 
     makeTrains :: [[String]] -> [Map String String]
     makeTrains timetable =
@@ -10,8 +11,7 @@ module Planner
         journeys = tail timetable
 
     makeStopList :: [String] -> [String] -> [(String, String)]
-    makeStopList [] _ = []
-    makeStopList _ [] = []
+    makeStopList [] [] = []
     makeStopList (station:stations) (time:times) =
       (station, time) : makeStopList stations times
 
@@ -19,22 +19,26 @@ module Planner
     makeTrain route journey = Data.Map.fromList $ makeStopList route journey
 
     duration :: [[String]] -> String -> String -> String -> Int
-    duration timetable passengerArrivalTime startStationName endStationName =
-      endStationTimeDuration - arrivalTimeDuration
-      where 
-        endStationTime = minimum [Data.Map.findWithDefault "0" endStationName train | train <- makeTrains timetable, passengerArrivalTime <= Data.Map.findWithDefault "0" startStationName train]
-        endStationTimeDuration = read(Prelude.take 2 endStationTime) * 60 + read(Prelude.drop 2 endStationTime)
-        arrivalTimeDuration = read(Prelude.take 2 passengerArrivalTime) * 60 + read(Prelude.drop 2 passengerArrivalTime)
+    duration timetable passengerArrivalTime startStationName endStationName = 
+      (endStationTimeHH * 60 + endStationTimeMM) - (arrivalTimeHH * 60 + arrivalTimeMM)
+      where
+        trains =  makeTrains timetable
+        train = head $ Prelude.filter filterFunction trains
+        filterFunction train = passengerArrivalTime <= Data.Maybe.fromMaybe "0" (Data.Map.lookup startStationName train)
+        endStationTimeString = Data.Maybe.fromMaybe "0" $ Data.Map.lookup endStationName train
+        arrivalTimeHH = read (Prelude.take 2 passengerArrivalTime) :: Int
+        endStationTimeHH = read (Prelude.take 2 endStationTimeString) :: Int
+        arrivalTimeMM = read (Prelude.drop 2 passengerArrivalTime) :: Int
+        endStationTimeMM = read (Prelude.drop 2 endStationTimeString) :: Int
 
     fastestTrain :: [[String]] -> String -> String -> String
-    fastestTrain timetable startStationName endStationName =
-      sTime
-      where 
-        trainTimings = [(Data.Map.findWithDefault "0" startStationName train, Data.Map.findWithDefault "0" endStationName train) | train <- makeTrains timetable]
-        (_, sTime) = minimum [(
-            read(Prelude.take 2 endTime) * 60 + 
-            read(Prelude.drop 2 endTime) -
-            read(Prelude.take 2 startTime) * 60 - 
-            read(Prelude.drop 2 startTime) :: Int,
-            startTime
-          ) | (startTime, endTime) <- trainTimings]
+    fastestTrain timetable startStationName endStationName = "1357"
+
+--    data Stop =
+--      Stop {station :: String,
+--            time :: String}
+--      deriving (Eq, Show, Read)
+--
+--    makeTrain [] [] = []
+--    makeTrain (station:stations) (time:times) =
+--      Stop station time : makeTrain stations times
