@@ -24,4 +24,4 @@ main = hspec $ do
       duration timetable "1101" "St Austell" "Par" `shouldBe` (56 :: Int)
 
     it "should report the fastest train between two stations" $ do 
-      fastestTrain timetable "Exeter St Davids" "Paddington" `shouldBe` ("1357" :: String)
+      fastestTrain timetable "Exeter St Davids" "London Paddington" `shouldBe` ("1357" :: String)
